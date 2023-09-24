@@ -1,16 +1,15 @@
 {
     "public": false,
     "manifestVersion": 1,
-    "id": "WSJF-extension",
-    "publisher": "MS-Agile-SAFe",
-    "version": "1.2.0",
-    "name": "WSJF (Weighted Shortest Job First)",
-    "description": "Auto calculates WSJF (weighted shortest job first) per work item and stores it in a work item field.",
+    "id": "GUT-Matrix",
+    "publisher": "LeonardoGargitter",
+    "version": "0.0.5",
+    "name": "GUT Matrix (Gravity, Urgency, Tendency)",
+    "description": "Auto calculates GUT matrix.",
     "categories": [ "Azure Boards" ],
     "tags": [
-        "WSJF",
-        "SAFe"
-    ],
+        "GUT"    
+        ],
     "targets": [
         {
             "id": "Microsoft.VisualStudio.Services"
@@ -25,7 +24,7 @@
                 "ms.vss-work-web.work-item-form"
             ],
             "properties": {
-                "uri": "wsjf.html"
+                "uri": "gut.html"
             }
         },
         {
@@ -36,8 +35,8 @@
                 "ms.vss-web.collection-admin-hub-group"
             ],
             "properties": {
-                "name": "WSJF",
-                "uri": "wsjfSettings.html"
+                "name": "GUT",
+                "uri": "gutSettings.html"
             }
         },
         {
@@ -52,7 +51,7 @@
                 "title": "Update the WSJF value for the selected work items",
                 "icon": "images/icon-refresh.png",
                 "groupId": "SAFe",
-                "uri": "wsjf.html"
+                "uri": "gut.html"
             }
         }
     ],
@@ -75,11 +74,11 @@
             "packagePath": "scripts"
         },
         {
-            "path": "wsjf.html",
+            "path": "gut.html",
             "addressable": true
         },
         {
-            "path": "wsjfSettings.html",
+            "path": "gutSettings.html",
             "addressable": true
         },
         {

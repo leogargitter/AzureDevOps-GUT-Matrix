@@ -1,9 +1,9 @@
 
 export interface StoredFieldReferences {
-    bvField: string,
-    tcField: string,
-    rvField: string,
+    gvField: string,
+    ugField: string,
+    tdField: string,
     effortField: string,
-    wsjfField: string
+    gutField: string
     roundTo: number
 }

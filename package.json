@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "devDependencies": {
-    "tfx-cli": "^0.11.0",
+    "tfx-cli": "^0.16.0",
     "typescript": "^4.5.2"
   },
   "scripts": {
@@ -10,6 +10,7 @@
     "package": "tfx extension create"
   },
   "dependencies": {
+    "azure-devops-extension-sdk": "^3.1.2",
     "q": "^1.5.1",
     "vss-web-extension-sdk": "^5.141.0"
   }

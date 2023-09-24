@@ -6,7 +6,7 @@ import WIT_Client = require("TFS/WorkItemTracking/RestClient");
 import Contracts = require("TFS/WorkItemTracking/Contracts");
 import Utils_string = require("VSS/Utils/String");
 
-import { StoredFieldReferences } from "./wsjfModels";
+import { StoredFieldReferences } from "./gutModels";
 
 export class Settings {
     private _changeMade = false;
@@ -61,19 +61,19 @@ export class Settings {
 
                 switch (this._id) {
                     case "businessValue":
-                        that._selectedFields.bvField = fieldReferenceName;
+                        that._selectedFields.gvField = fieldReferenceName;
                         break;
                     case "timeCriticality":
-                        that._selectedFields.tcField = fieldReferenceName;
+                        that._selectedFields.ugField = fieldReferenceName;
                         break;
                     case "rroevalue":
-                        that._selectedFields.rvField = fieldReferenceName;
+                        that._selectedFields.tdField = fieldReferenceName;
                         break;
                     case "effort":
                         that._selectedFields.effortField = fieldReferenceName;
                         break;
                     case "wsjf":
-                        that._selectedFields.wsjfField = fieldReferenceName;
+                        that._selectedFields.gutField = fieldReferenceName;
                         break;
                 }
                 that.updateSaveButton();
@@ -139,20 +139,20 @@ export class Settings {
         };
         this._menuBar = Controls.create<Menus.MenuBar, any>(Menus.MenuBar, container, menubarOptions);
 
-        let bvContainer = $("<div />").addClass("settings-control").appendTo(container);
-        $("<label />").text("Business Value Field").appendTo(bvContainer);
+        let gvContainer = $("<div />").addClass("settings-control").appendTo(container);
+        $("<label />").text("Gravity").appendTo(gvContainer);
 
-        let tcContainer = $("<div />").addClass("settings-control").appendTo(container);
-        $("<label />").text("Time Criticality Field").appendTo(tcContainer);
+        let ugContainer = $("<div />").addClass("settings-control").appendTo(container);
+        $("<label />").text("Urgency").appendTo(ugContainer);
 
-        let rvContainer = $("<div />").addClass("settings-control").appendTo(container);
-        $("<label />").text("RR-OE Values Field").appendTo(rvContainer);
+        let tdContainer = $("<div />").addClass("settings-control").appendTo(container);
+        $("<label />").text("Tendency").appendTo(tdContainer);
 
         let effortContainer = $("<div />").addClass("settings-control").appendTo(container);
         $("<label />").text("Effort Field").appendTo(effortContainer);
 
-        let wsjfContainer = $("<div />").addClass("settings-control").appendTo(container);
-        $("<label />").text("WSJF Field").appendTo(wsjfContainer);
+        let gutContainer = $("<div />").addClass("settings-control").appendTo(container);
+        $("<label />").text("GUT Result Field").appendTo(gutContainer);
 
         let roundToContainer = $("<div />").addClass("settings-control").appendTo(container);
         $("<label />").text("Round to X decimals (-1 = don't round)").appendTo(roundToContainer);
@@ -165,23 +165,23 @@ export class Settings {
                 }
                 else {
                     console.log("Failed to retrieve fields from storage, defaulting values")
-					//Enter in your config referenceName for "rvField" and "wsjfField"
+					//Enter in your config referenceName for "tdField" and "gutField"
                     this._selectedFields = {
-                        bvField: "Microsoft.VSTS.Common.BusinessValue",
-                        tcField: "Microsoft.VSTS.Common.TimeCriticality",
-                        rvField: null,
+                        gvField: "Microsoft.VSTS.Common.BusinessValue",
+                        ugField: "Microsoft.VSTS.Common.TimeCriticality",
+                        tdField: null,
                         effortField: "Microsoft.VSTS.Scheduling.Effort",
-                        wsjfField: null,
+                        gutField: null,
                         roundTo: 0
                     };
                 }
 
                 this.getSortedFieldsList().then((fieldList) => {
-                    Controls.create(Combo, bvContainer, this.getComboOptions("businessValue", fieldList, this._selectedFields.bvField));
-                    Controls.create(Combo, tcContainer, this.getComboOptions("timeCriticality", fieldList, this._selectedFields.tcField));
-                    Controls.create(Combo, rvContainer, this.getComboOptions("rroevalue", fieldList, this._selectedFields.rvField));
+                    Controls.create(Combo, gvContainer, this.getComboOptions("businessValue", fieldList, this._selectedFields.gvField));
+                    Controls.create(Combo, ugContainer, this.getComboOptions("timeCriticality", fieldList, this._selectedFields.ugField));
+                    Controls.create(Combo, tdContainer, this.getComboOptions("rroevalue", fieldList, this._selectedFields.tdField));
                     Controls.create(Combo, effortContainer, this.getComboOptions("effort", fieldList, this._selectedFields.effortField));
-                    Controls.create(Combo, wsjfContainer, this.getComboOptions("wsjf", fieldList, this._selectedFields.wsjfField));
+                    Controls.create(Combo, gutContainer, this.getComboOptions("wsjf", fieldList, this._selectedFields.gutField));
                     Controls.create(Combo, roundToContainer, this.getNumeralComboOptions("roundTo", [-1,0,1,2,3], this._selectedFields.roundTo));
                     this.updateSaveButton();
 
@@ -202,8 +202,8 @@ export class Settings {
     } 
 
     private updateSaveButton() {
-        var buttonState = (this._selectedFields.bvField && this._selectedFields.tcField && this._selectedFields.rvField &&
-                            this._selectedFields.effortField && this._selectedFields.wsjfField) && this._changeMade
+        var buttonState = (this._selectedFields.gvField && this._selectedFields.ugField && this._selectedFields.tdField &&
+                            this._selectedFields.effortField && this._selectedFields.gutField) && this._changeMade
                             ? Menus.MenuItemState.None : Menus.MenuItemState.Disabled;
 
         // Update the disabled state
