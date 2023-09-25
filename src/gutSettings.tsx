@@ -72,13 +72,13 @@ export class Settings {
                     case "Tendency":
                         that._selectedFields.tdField = fieldReferenceName;
                         break;
-                    case "gut":
+                    case "GUT":
                         that._selectedFields.gutField = fieldReferenceName;
                         break;
-                    case "date":
+                    case "Date":
                         that._selectedFields.dateField = fieldReferenceName;
                         break;
-                    case "multiplier":
+                    case "Multiplier":
                         that._selectedFields.multField = fieldReferenceName;
                         break;
                 }
@@ -108,18 +108,18 @@ export class Settings {
         let hubContent = $(".hub-content");
         let uri = VSS.getWebContext().collection.uri + "_admin/_process";
         
-        let descriptionText = "{0} is a concept of {1} used for weighing the cost of delay with job size.";
+        let descriptionText = "A Matriz GUT é uma ferramenta que auxilia na priorização de resolução de problemas (por isso é também conhecida como Matriz de Prioridades). A análise GUT é muito utilizada naquelas questões em que é preciso de uma orientação para tomar decisões complexas e que exigem a análise de vários problemas. Os fatores trabalhados com a Matriz GUT (Gravidade, Urgência e Tendência) são pontuados de 1 a 5:";
         let header = $("<div />").addClass("description-text bowtie").appendTo(hubContent);
         header = $("<div />").addClass("description-text bowtie").appendTo(hubContent);
         header.html(Utils_string.format(descriptionText));
 
-        $("<img src='https://www.scaledagileframework.com/wp-content/uploads/2014/07/Figure-2.-A-formula-for-calculating-WSJF.png' />").addClass("description-image").appendTo(hubContent);
+        $("<img src='https://media.treasy.com.br/media/2018/02/como-montar-a-matriz-gut.png' />").addClass("description-image").appendTo(hubContent);
         
-        descriptionText = "You must add a custom decimal field from the {0} to each work item type you wish to compute WSJF.";
+        descriptionText = "";
         header = $("<div />").addClass("description-text bowtie").appendTo(hubContent);
         header.html(Utils_string.format(descriptionText, "<a target='_blank' href='" + uri +"'>process hub</a>"));
 
-        let container = $("<div />").addClass("wsjf-settings-container").appendTo(hubContent);
+        let container = $("<div />").addClass("gut-settings-container").appendTo(hubContent);
 
         var menubarOptions = {
             items: [
@@ -180,9 +180,9 @@ export class Settings {
                     Controls.create(Combo, gvContainer, this.getComboOptions("Gravity", fieldList, this._selectedFields.gvField));
                     Controls.create(Combo, ugContainer, this.getComboOptions("Urgency", fieldList, this._selectedFields.ugField));
                     Controls.create(Combo, tdContainer, this.getComboOptions("Tendency", fieldList, this._selectedFields.tdField));
-                    Controls.create(Combo, gutContainer, this.getComboOptions("gut", fieldList, this._selectedFields.gutField));
-                    Controls.create(Combo, dateContainer, this.getComboOptions("date", fieldList, this._selectedFields.dateField));
-                    Controls.create(Combo, multContainer, this.getComboOptions("multiplier", fieldList, this._selectedFields.multField));
+                    Controls.create(Combo, gutContainer, this.getComboOptions("GUT", fieldList, this._selectedFields.gutField));
+                    Controls.create(Combo, dateContainer, this.getComboOptions("Date", fieldList, this._selectedFields.dateField));
+                    Controls.create(Combo, multContainer, this.getComboOptions("Multiplier", fieldList, this._selectedFields.multField));
                     this.updateSaveButton();
 
                     VSS.notifyLoadSucceeded();

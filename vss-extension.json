@@ -3,7 +3,7 @@
     "manifestVersion": 1,
     "id": "GUT-Matrix",
     "publisher": "LeonardoGargitter",
-    "version": "0.0.10",
+    "version": "0.1.0",
     "name": "GUT Matrix (Gravity, Urgency, Tendency)",
     "description": "Auto calculates GUT matrix.",
     "categories": [ "Azure Boards" ],
@@ -17,9 +17,9 @@
     ],
     "contributions": [
         {
-            "id": "wsjf-work-item-form-observer",
+            "id": "gut-work-item-form-observer",
             "type": "ms.vss-work-web.work-item-notifications",
-            "description": "Update the 'WSJF' field when other fields on the form change.",
+            "description": "Update the 'GUT' field when other fields on the form change.",
             "targets": [
                 "ms.vss-work-web.work-item-form"
             ],
@@ -28,9 +28,9 @@
             }
         },
         {
-            "id": "wsjf-settings-hub",
+            "id": "gut-settings-hub",
             "type": "ms.vss-web.hub",
-            "description": "Collection level settings experience for managing fields used to calculate WSJF.",
+            "description": "Collection level settings experience for managing fields used to calculate GUT.",
             "targets": [
                 "ms.vss-web.collection-admin-hub-group"
             ],
@@ -40,15 +40,15 @@
             }
         },
         {
-            "id": "wsjf-contextMenu",
+            "id": "gut-contextMenu",
             "type": "ms.vss-web.action",
-            "description": "Work item context menu action to update the WSJF field value for the selected work items.",
+            "description": "Work item context menu action to update the GUT field value for the selected work items.",
             "targets": [
                 "ms.vss-work-web.work-item-context-menu"
             ],
             "properties": {
-                "text": "Recalculate WSJF values",
-                "title": "Update the WSJF value for the selected work items",
+                "text": "Recalculate GUT values",
+                "title": "Update the GUT value for the selected work items",
                 "icon": "images/icon-refresh.png",
                 "groupId": "SAFe",
                 "uri": "gut.html"

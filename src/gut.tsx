@@ -30,16 +30,16 @@ function getWorkItemFormService()
 function updateGUTOnForm(storedFields:StoredFieldReferences) {
     getWorkItemFormService().then((service) => {
         service.getFields().then((fields: TFS_Wit_Contracts.WorkItemField[]) => {
-            var matchingGravityFields = fields.filter(field => field.referenceName === storedFields.gvField);
-            var matchingUrgencyFields = fields.filter(field => field.referenceName === storedFields.ugField);
+            var matchingGravityFields  = fields.filter(field => field.referenceName === storedFields.gvField);
+            var matchingUrgencyFields  = fields.filter(field => field.referenceName === storedFields.ugField);
             var matchingTendencyFields = fields.filter(field => field.referenceName === storedFields.tdField);
-            var matchingGUTFields = fields.filter(field => field.referenceName === storedFields.gutField);
+            var matchingGUTFields      = fields.filter(field => field.referenceName === storedFields.gutField);
 
-            //If this work item type has WSJF, then update WSJF
-            if ((matchingGravityFields.length > 0) &&
-                (matchingUrgencyFields.length > 0) &&
+            //If this work item type has GUT, then update GUT
+            if ((matchingGravityFields.length  > 0) &&
+                (matchingUrgencyFields.length  > 0) &&
                 (matchingTendencyFields.length > 0) &&
-                (matchingGUTFields.length > 0)) {
+                (matchingGUTFields.length      > 0)) {
                 service.getFieldValues([storedFields.gvField, storedFields.ugField, storedFields.tdField, storedFields.multField]).then((values) => {
                     var Gravity  = +values[storedFields.gvField].toString().split('-')[0].trim();
                     var Urgency  = +values[storedFields.ugField].toString().split('-')[0].trim();
@@ -49,13 +49,13 @@ function updateGUTOnForm(storedFields:StoredFieldReferences) {
 
                     var gut = (Gravity * Urgency * Tendency);
 
-                    if (gut < 25){
+                    if (gut <= 9){
                         gut = 4;
                     }
-                    else if (gut < 50){
+                    else if (gut <= 25){
                         gut = 3;
                     }
-                    else if (gut < 80){
+                    else if (gut < 50){
                         gut = 2;
                     }
                     else {
@@ -75,7 +75,7 @@ function updateGUTOnForm(storedFields:StoredFieldReferences) {
     });
 }
 
-function updateWSJFOnGrid(workItemId, storedFields:StoredFieldReferences):IPromise<any> {
+function updateGUTOnGrid(workItemId, storedFields:StoredFieldReferences):IPromise<any> {
     let gutFields = [
         storedFields.gvField,
         storedFields.ugField,
@@ -92,15 +92,15 @@ function updateWSJFOnGrid(workItemId, storedFields:StoredFieldReferences):IPromi
             var Urgency  = +workItem.fields[storedFields.ugField].toString().split('-')[0].trim();
             var Tendency = +workItem.fields[storedFields.tdField].toString().split('-')[0].trim();
 
-            var gut = 0;
-            gut = Gravity + Urgency + Tendency;
-            if (gut < 25){
+            var gut = Gravity + Urgency + Tendency;
+
+            if (gut <= 9){
                 gut = 4;
             }
-            else if (gut < 50){
+            else if (gut <= 25){
                 gut = 3;
             }
-            else if (gut < 80){
+            else if (gut < 50){
                 gut = 2;
             }
             else {
@@ -114,7 +114,7 @@ function updateWSJFOnGrid(workItemId, storedFields:StoredFieldReferences):IPromi
                 value: gut
             }];
 
-            // Only update the work item if the WSJF has changed
+            // Only update the work item if the GUT has changed
             if (gut != workItem.fields[storedFields.gutField]) {
                 client.updateWorkItem(document, workItemId).then((updatedWorkItem:TFS_Wit_Contracts.WorkItem) => {
                     deferred.resolve(updatedWorkItem);
@@ -126,7 +126,7 @@ function updateWSJFOnGrid(workItemId, storedFields:StoredFieldReferences):IPromi
         }
         else
         {
-            deferred.reject("Unable to calculate WSJF, please configure fields on the collection settings page.");
+            deferred.reject("Unable to calculate GUT, please configure fields on the collection settings page.");
         }
     });
 
@@ -176,7 +176,7 @@ var contextProvider = (context) => {
                     var workItemIds = args.workItemIds;
                     var promises = [];
                     $.each(workItemIds, function(index, workItemId) {
-                        promises.push(updateWSJFOnGrid(workItemId, storedFields));
+                        promises.push(updateGUTOnGrid(workItemId, storedFields));
                     });
 
                     // Refresh view
@@ -198,5 +198,5 @@ var contextProvider = (context) => {
 }
 
 let extensionContext = VSS.getExtensionContext();
-VSS.register(`${extensionContext.publisherId}.${extensionContext.extensionId}.wsjf-work-item-form-observer`, formObserver);
-VSS.register(`${extensionContext.publisherId}.${extensionContext.extensionId}.wsjf-contextMenu`, contextProvider);
+VSS.register(`${extensionContext.publisherId}.${extensionContext.extensionId}.gut-work-item-form-observer`, formObserver);
+VSS.register(`${extensionContext.publisherId}.${extensionContext.extensionId}.gut-contextMenu`, contextProvider);
