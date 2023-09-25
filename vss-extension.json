@@ -3,7 +3,7 @@
     "manifestVersion": 1,
     "id": "GUT-Matrix",
     "publisher": "LeonardoGargitter",
-    "version": "0.0.5",
+    "version": "0.0.10",
     "name": "GUT Matrix (Gravity, Urgency, Tendency)",
     "description": "Auto calculates GUT matrix.",
     "categories": [ "Azure Boards" ],

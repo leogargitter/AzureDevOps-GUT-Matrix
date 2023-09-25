@@ -18,7 +18,10 @@ export class Settings {
         var deferred = Q.defer();
         var client = WIT_Client.getClient();
         client.getFields().then((fields: Contracts.WorkItemField[]) => {
-            this._fields = fields.filter(field => (field.type === Contracts.FieldType.Double || field.type === Contracts.FieldType.Integer))
+            this._fields = fields.filter(field => (field.type === Contracts.FieldType.Double  || 
+                                                   field.type === Contracts.FieldType.Integer || 
+                                                   field.type === Contracts.FieldType.String  ||
+                                                   field.type === Contracts.FieldType.DateTime))
             var sortedFields = this._fields.map(field => field.name).sort((field1,field2) => {
                 if (field1 > field2) {
                     return 1;
@@ -60,20 +63,23 @@ export class Settings {
                 let fieldReferenceName: string = (this.getSelectedIndex() < 0) ? null : that.getFieldReferenceName(fieldName);
 
                 switch (this._id) {
-                    case "businessValue":
+                    case "Gravity":
                         that._selectedFields.gvField = fieldReferenceName;
                         break;
-                    case "timeCriticality":
+                    case "Urgency":
                         that._selectedFields.ugField = fieldReferenceName;
                         break;
-                    case "rroevalue":
+                    case "Tendency":
                         that._selectedFields.tdField = fieldReferenceName;
                         break;
-                    case "effort":
-                        that._selectedFields.effortField = fieldReferenceName;
-                        break;
-                    case "wsjf":
+                    case "gut":
                         that._selectedFields.gutField = fieldReferenceName;
+                        break;
+                    case "date":
+                        that._selectedFields.dateField = fieldReferenceName;
+                        break;
+                    case "multiplier":
+                        that._selectedFields.multField = fieldReferenceName;
                         break;
                 }
                 that.updateSaveButton();
@@ -93,12 +99,6 @@ export class Settings {
             change: function () {
                 that._changeMade = true;
                 let num: number = +(this.getText());
-
-                switch (this._id) {
-                    case "roundTo":
-                        that._selectedFields.roundTo = num;
-                        break;
-                }
                 that.updateSaveButton();
             }
         };
@@ -148,14 +148,14 @@ export class Settings {
         let tdContainer = $("<div />").addClass("settings-control").appendTo(container);
         $("<label />").text("Tendency").appendTo(tdContainer);
 
-        let effortContainer = $("<div />").addClass("settings-control").appendTo(container);
-        $("<label />").text("Effort Field").appendTo(effortContainer);
-
         let gutContainer = $("<div />").addClass("settings-control").appendTo(container);
         $("<label />").text("GUT Result Field").appendTo(gutContainer);
 
-        let roundToContainer = $("<div />").addClass("settings-control").appendTo(container);
-        $("<label />").text("Round to X decimals (-1 = don't round)").appendTo(roundToContainer);
+        let dateContainer = $("<div />").addClass("settings-control").appendTo(container);
+        $("<label />").text("Target Date Field").appendTo(dateContainer);
+
+        let multContainer = $("<div />").addClass("settings-control").appendTo(container);
+        $("<label />").text("Multiplier Field").appendTo(multContainer);
 
         VSS.getService<IExtensionDataService>(VSS.ServiceIds.ExtensionData).then((dataService: IExtensionDataService) => {
             dataService.getValue<StoredFieldReferences>("storedFields").then((storedFields:StoredFieldReferences) => {
@@ -167,22 +167,22 @@ export class Settings {
                     console.log("Failed to retrieve fields from storage, defaulting values")
 					//Enter in your config referenceName for "tdField" and "gutField"
                     this._selectedFields = {
-                        gvField: "Microsoft.VSTS.Common.BusinessValue",
-                        ugField: "Microsoft.VSTS.Common.TimeCriticality",
+                        gvField: null,
+                        ugField: null,
                         tdField: null,
-                        effortField: "Microsoft.VSTS.Scheduling.Effort",
                         gutField: null,
-                        roundTo: 0
+                        dateField: null,
+                        multField: null
                     };
                 }
 
                 this.getSortedFieldsList().then((fieldList) => {
-                    Controls.create(Combo, gvContainer, this.getComboOptions("businessValue", fieldList, this._selectedFields.gvField));
-                    Controls.create(Combo, ugContainer, this.getComboOptions("timeCriticality", fieldList, this._selectedFields.ugField));
-                    Controls.create(Combo, tdContainer, this.getComboOptions("rroevalue", fieldList, this._selectedFields.tdField));
-                    Controls.create(Combo, effortContainer, this.getComboOptions("effort", fieldList, this._selectedFields.effortField));
-                    Controls.create(Combo, gutContainer, this.getComboOptions("wsjf", fieldList, this._selectedFields.gutField));
-                    Controls.create(Combo, roundToContainer, this.getNumeralComboOptions("roundTo", [-1,0,1,2,3], this._selectedFields.roundTo));
+                    Controls.create(Combo, gvContainer, this.getComboOptions("Gravity", fieldList, this._selectedFields.gvField));
+                    Controls.create(Combo, ugContainer, this.getComboOptions("Urgency", fieldList, this._selectedFields.ugField));
+                    Controls.create(Combo, tdContainer, this.getComboOptions("Tendency", fieldList, this._selectedFields.tdField));
+                    Controls.create(Combo, gutContainer, this.getComboOptions("gut", fieldList, this._selectedFields.gutField));
+                    Controls.create(Combo, dateContainer, this.getComboOptions("date", fieldList, this._selectedFields.dateField));
+                    Controls.create(Combo, multContainer, this.getComboOptions("multiplier", fieldList, this._selectedFields.multField));
                     this.updateSaveButton();
 
                     VSS.notifyLoadSucceeded();
@@ -203,7 +203,7 @@ export class Settings {
 
     private updateSaveButton() {
         var buttonState = (this._selectedFields.gvField && this._selectedFields.ugField && this._selectedFields.tdField &&
-                            this._selectedFields.effortField && this._selectedFields.gutField) && this._changeMade
+                           this._selectedFields.gutField && this._selectedFields.dateField && this._selectedFields.multField) && this._changeMade
                             ? Menus.MenuItemState.None : Menus.MenuItemState.Disabled;
 
         // Update the disabled state

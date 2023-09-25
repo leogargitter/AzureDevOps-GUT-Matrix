@@ -27,37 +27,48 @@ function getWorkItemFormService()
     return TFS_Wit_Services.WorkItemFormService.getService();
 }
 
-function updateWSJFOnForm(storedFields:StoredFieldReferences) {
+function updateGUTOnForm(storedFields:StoredFieldReferences) {
     getWorkItemFormService().then((service) => {
         service.getFields().then((fields: TFS_Wit_Contracts.WorkItemField[]) => {
-            var matchingBusinessValueFields = fields.filter(field => field.referenceName === storedFields.gvField);
-            var matchingTimeCriticalityFields = fields.filter(field => field.referenceName === storedFields.ugField);
-            var matchingRROEValueFields = fields.filter(field => field.referenceName === storedFields.tdField);
-            var matchingEffortFields = fields.filter(field => field.referenceName === storedFields.effortField); 
-            var matchinggutFields = fields.filter(field => field.referenceName === storedFields.gutField);
-            var roundTo: number = storedFields.roundTo;
+            var matchingGravityFields = fields.filter(field => field.referenceName === storedFields.gvField);
+            var matchingUrgencyFields = fields.filter(field => field.referenceName === storedFields.ugField);
+            var matchingTendencyFields = fields.filter(field => field.referenceName === storedFields.tdField);
+            var matchingGUTFields = fields.filter(field => field.referenceName === storedFields.gutField);
 
             //If this work item type has WSJF, then update WSJF
-            if ((matchingBusinessValueFields.length > 0) &&
-                (matchingTimeCriticalityFields.length > 0) &&
-                (matchingRROEValueFields.length > 0) &&
-                (matchingEffortFields.length > 0) &&
-                (matchinggutFields.length > 0)) {
-                service.getFieldValues([storedFields.gvField, storedFields.ugField, storedFields.tdField, storedFields.effortField]).then((values) => {
-                    var businessValue  = +values[storedFields.gvField];
-                    var timeCriticality = +values[storedFields.ugField];
-                    var rroevalue = +values[storedFields.tdField];
-                    var effort = +values[storedFields.effortField];
-
-                    var wsjf = 0;
-                    if (effort > 0) {
-                        wsjf = (businessValue + timeCriticality + rroevalue)/effort;
-                        if(roundTo > -1) {
-                            wsjf = Math.round(wsjf * Math.pow(10, roundTo)) / Math.pow(10, roundTo)
-                        }
-                    }
+            if ((matchingGravityFields.length > 0) &&
+                (matchingUrgencyFields.length > 0) &&
+                (matchingTendencyFields.length > 0) &&
+                (matchingGUTFields.length > 0)) {
+                service.getFieldValues([storedFields.gvField, storedFields.ugField, storedFields.tdField, storedFields.multField]).then((values) => {
+                    var Gravity  = +values[storedFields.gvField].toString().split('-')[0].trim();
+                    var Urgency  = +values[storedFields.ugField].toString().split('-')[0].trim();
+                    var Tendency = +values[storedFields.tdField].toString().split('-')[0].trim();
                     
-                    service.setFieldValue(storedFields.gutField, wsjf);
+                    var Multiplier = +values[storedFields.multField];
+
+                    var gut = (Gravity * Urgency * Tendency);
+
+                    if (gut < 25){
+                        gut = 4;
+                    }
+                    else if (gut < 50){
+                        gut = 3;
+                    }
+                    else if (gut < 80){
+                        gut = 2;
+                    }
+                    else {
+                        gut = 1;
+                    }
+
+                    service.setFieldValue(storedFields.gutField, gut);
+
+                    let date: Date = new Date();
+                    date.setDate(date.getDate() + (gut * Multiplier));
+                    date.setHours(20);
+                    date.setMinutes(59);
+                    service.setFieldValue(storedFields.dateField, date)
                 });
             }
         });
@@ -69,7 +80,6 @@ function updateWSJFOnGrid(workItemId, storedFields:StoredFieldReferences):IPromi
         storedFields.gvField,
         storedFields.ugField,
         storedFields.tdField,
-        storedFields.effortField,
         storedFields.gutField
     ];
 
@@ -78,29 +88,34 @@ function updateWSJFOnGrid(workItemId, storedFields:StoredFieldReferences):IPromi
     var client = TFS_Wit_Client.getClient();
     client.getWorkItem(workItemId, gutFields).then((workItem: TFS_Wit_Contracts.WorkItem) => {
         if (storedFields.gutField !== undefined && storedFields.tdField !== undefined) {     
-            var businessValue = +workItem.fields[storedFields.gvField];
-            var timeCriticality = +workItem.fields[storedFields.ugField];
-            var rroevalue = +workItem.fields [storedFields.tdField];
-            var effort = +workItem.fields[storedFields.effortField];
-            var roundTo: number = storedFields.roundTo;
+            var Gravity  = +workItem.fields[storedFields.gvField].toString().split('-')[0].trim();
+            var Urgency  = +workItem.fields[storedFields.ugField].toString().split('-')[0].trim();
+            var Tendency = +workItem.fields[storedFields.tdField].toString().split('-')[0].trim();
 
-            var wsjf = 0;
-            if (effort > 0) {
-                wsjf = (businessValue + timeCriticality + rroevalue)/effort;
-                if(roundTo > -1) {
-                    wsjf = Math.round(wsjf * Math.pow(10, roundTo)) / Math.pow(10, roundTo)
-                }
+            var gut = 0;
+            gut = Gravity + Urgency + Tendency;
+            if (gut < 25){
+                gut = 4;
+            }
+            else if (gut < 50){
+                gut = 3;
+            }
+            else if (gut < 80){
+                gut = 2;
+            }
+            else {
+                gut = 1;
             }
 
             var document = [{
                 from: null,
                 op: "add",
                 path: '/fields/' + storedFields.gutField,
-                value: wsjf
+                value: gut
             }];
 
             // Only update the work item if the WSJF has changed
-            if (wsjf != workItem.fields[storedFields.gutField]) {
+            if (gut != workItem.fields[storedFields.gutField]) {
                 client.updateWorkItem(document, workItemId).then((updatedWorkItem:TFS_Wit_Contracts.WorkItem) => {
                     deferred.resolve(updatedWorkItem);
                 });
@@ -122,17 +137,16 @@ var formObserver = (context) => {
     return {
         onFieldChanged: function(args) {
             GetStoredFields().then((storedFields:StoredFieldReferences) => {
-                if (storedFields && storedFields.gvField && storedFields.effortField && storedFields.ugField && storedFields.tdField && storedFields.gutField) {
+                if (storedFields && storedFields.gvField && storedFields.ugField && storedFields.tdField && storedFields.gutField) {
                     //If one of fields in the calculation changes
                     if ((args.changedFields[storedFields.gvField] !== undefined) || 
                         (args.changedFields[storedFields.ugField] !== undefined) ||
-                        (args.changedFields[storedFields.tdField] !== undefined) ||
-                        (args.changedFields[storedFields.effortField] !== undefined)) {
-                            updateWSJFOnForm(storedFields);
+                        (args.changedFields[storedFields.tdField] !== undefined)) {
+                            updateGUTOnForm(storedFields);
                         }
                 }
                 else {
-                    console.log("Unable to calculate WSJF, please configure fields on the collection settings page.");    
+                    console.log("Unable to calculate GUT, please configure fields on the collection settings page.");    
                 }
             }, (reason) => {
                 console.log(reason);
@@ -141,11 +155,11 @@ var formObserver = (context) => {
         
         onLoaded: function(args) {
             GetStoredFields().then((storedFields:StoredFieldReferences) => {
-                if (storedFields && storedFields.gvField && storedFields.effortField && storedFields.ugField && storedFields.tdField && storedFields.gutField) {
-                    updateWSJFOnForm(storedFields);
+                if (storedFields && storedFields.gvField && storedFields.ugField && storedFields.tdField && storedFields.gutField && storedFields.dateField) {
+                    updateGUTOnForm(storedFields);
                 }
                 else {
-                    console.log("Unable to calculate WSJF, please configure fields on the collection settings page.");
+                    console.log("Unable to calculate GUT, please configure fields on the collection settings page.");
                 }
             }, (reason) => {
                 console.log(reason);
@@ -158,7 +172,7 @@ var contextProvider = (context) => {
     return {
         execute: function(args) {
             GetStoredFields().then((storedFields:StoredFieldReferences) => {
-                if (storedFields && storedFields.gvField && storedFields.effortField && storedFields.ugField && storedFields.tdField && storedFields.gutField) {
+                if (storedFields && storedFields.gvField && storedFields.ugField && storedFields.tdField && storedFields.gutField && storedFields.dateField) {
                     var workItemIds = args.workItemIds;
                     var promises = [];
                     $.each(workItemIds, function(index, workItemId) {
@@ -173,7 +187,7 @@ var contextProvider = (context) => {
                     });
                 }
                 else {
-                    console.log("Unable to calculate WSJF, please configure fields on the collection settings page.");
+                    console.log("Unable to calculate GUT, please configure fields on the collection settings page.");
                     //TODO: Disable context menu item
                 }
             }, (reason) => {
