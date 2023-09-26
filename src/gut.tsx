@@ -3,7 +3,6 @@ import Q = require("q");
 import TFS_Wit_Contracts = require("TFS/WorkItemTracking/Contracts");
 import TFS_Wit_Client = require("TFS/WorkItemTracking/RestClient");
 import TFS_Wit_Services = require("TFS/WorkItemTracking/Services");
-
 import { StoredFieldReferences } from "./gutModels";
  
 function GetStoredFields(): IPromise<any> {
@@ -66,7 +65,7 @@ function updateGUTOnForm(storedFields:StoredFieldReferences) {
 
                     let date: Date = new Date();
                     date.setDate(date.getDate() + (gut * Multiplier));
-                    date.setHours(20);
+                    date.setHours(23);
                     date.setMinutes(59);
                     service.setFieldValue(storedFields.dateField, date)
                 });
@@ -82,7 +81,7 @@ function updateGUTOnGrid(workItemId, storedFields:StoredFieldReferences):IPromis
         storedFields.tdField,
         storedFields.gutField
     ];
-
+    
     var deferred = Q.defer();
 
     var client = TFS_Wit_Client.getClient();
